@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904
+# pylint: disable=W0212,R0904,W0201
 
 from hamcrest import is_
 from hamcrest import none
