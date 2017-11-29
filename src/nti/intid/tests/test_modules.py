@@ -13,7 +13,7 @@ import unittest
 from zope.dottedname import resolve as dottedname
 
 
-class TestImport(unittest.TestCase):
+class TestModules(unittest.TestCase):
 
     def test_import_interfaces(self):
         dottedname.resolve('nti.intid.interfaces')

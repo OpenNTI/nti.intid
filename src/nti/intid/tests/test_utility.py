@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904
+# pylint: disable=W0212,R0904,W0201
 
 from hamcrest import is_
 from hamcrest import none
@@ -19,6 +19,8 @@ does_not = is_not
 
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
+
+from nti.testing.base import AbstractTestBase
 
 import struct
 
@@ -36,8 +38,6 @@ from persistent import Persistent
 from nti.intid.interfaces import IIntIds
 
 from nti.intid.utility import IntIds
-
-from nti.testing.base import AbstractTestBase
 
 
 @interface.implementer(ILocation)
