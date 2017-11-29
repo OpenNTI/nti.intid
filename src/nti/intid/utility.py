@@ -18,7 +18,6 @@ from Acquisition import aq_base
 import BTrees
 
 from zope import interface
-from zope import deferredimport
 
 from zope.event import notify as zope_notify
 
@@ -33,16 +32,12 @@ from nti.intid.interfaces import IIntIds
 
 logger = __import__('logging').getLogger(__name__)
 
-
-deferredimport.initialize()
-deferredimport.deprecated(
+import zope.deferredimport
+zope.deferredimport.initialize()
+zope.deferredimport.deprecated(
     "Import from zope.intid.interfaces instead",
     IntIdMissingError='zope.intid.interfaces:IntIdMissingError',
     ObjectMissingError='zope.intid.interfaces:ObjectMissingError')
-
-
-# Make pylint not complain about "badly implemented container"
-# pylint: disable=R0924
 
 
 @interface.implementer(IIntIds)
@@ -78,12 +73,12 @@ class IntIds(_ZCIntIds):
         """
         return _ZCIntIds.queryId(self, aq_base(ob), default=default)
 
-    def register(self, ob, *unused_args, **unused_kwargs):
+    def register(self, ob):
         result = _ZCIntIds.register(self, aq_base(ob))
         logger.debug('%s was registered with intid %s', type(ob), result)
         return result
 
-    def unregister(self, ob, *unused_args, **unused_kwargs):
+    def unregister(self, ob):
         return _ZCIntIds.unregister(self, aq_base(ob))
 
     def getId(self, ob):
