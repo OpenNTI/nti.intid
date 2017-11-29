@@ -134,8 +134,6 @@ class TestIntidWref(IntIdTestCase):
             assert_that(bt[ref_1], is_(1))
             assert_that(bt[ref_2], is_(2))
 
-            assert_that(bt.get('foo'), is_(none()))
-
     @WithMockDS
     def test_eq_ne(self):
         with mock_db_trans() as conn:
