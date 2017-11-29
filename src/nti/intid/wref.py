@@ -14,6 +14,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+# pylint: disable=W0212
+
 import warnings
 import functools
 
@@ -49,7 +51,7 @@ class _AbstractWeakRef(object):
     to declare that in ``__slots__.``
     """
 
-    __slots__ = ()
+    __slots__ = ('_entity_id', '_entity_oid', '_v_entity_cache')
 
     def __init__(self, content_object):
         self._entity_id = component.getUtility(IIntIds).getId(content_object)
@@ -137,8 +139,6 @@ class WeakRef(_AbstractWeakRef):
     OOSet objects and OOBTree objects as keys (if subclassed to provide
     total ordering!)
     """
-
-    __slots__ = ('_entity_id', '_entity_oid', '_v_entity_cache')
 
     def __getstate__(self):
         return self._entity_id, self._entity_oid

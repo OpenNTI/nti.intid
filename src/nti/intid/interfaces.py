@@ -8,21 +8,19 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from zope import deferredimport
+from zope.location.interfaces import IContained
 
-from zope.container.interfaces import IContained
-
-from zc.intid.interfaces import IIntIds
 from zc.intid.interfaces import IIntIdsSubclass
+from zc.intid.interfaces import IIntIds as IZCIIntIds
 
-
-deferredimport.initialize()
-deferredimport.deprecated(
+import zope.deferredimport
+zope.deferredimport.initialize()
+zope.deferredimport.deprecated(
     "Import from zope.intid.interfaces instead",
     IntIdMissingError='zope.intid.interfaces:IntIdMissingError',
     ObjectMissingError='zope.intid.interfaces:ObjectMissingError')
 
-deferredimport.deprecated(
+zope.deferredimport.deprecated(
     "Import from zc.intid.interfaces instead",
     IntIdAlreadyInUseError='zc.intid.interfaces:IntIdInUseError',
     IIntIdEvent='zc.intid.interfaces:ISubscriberEvent',
@@ -32,7 +30,7 @@ deferredimport.deprecated(
     IntIdRemovedEvent='zc.intid.interfaces:BeforeIdRemovedEvent')
 
 
-class IIntIds(IIntIds, IIntIdsSubclass, IContained):
+class IIntIds(IZCIIntIds, IIntIdsSubclass, IContained):
 
     def randomize():
         """
