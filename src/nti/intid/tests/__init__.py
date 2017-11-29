@@ -35,8 +35,6 @@ from zope.site import SiteManagerContainer
 
 from zope.site.folder import rootFolder
 
-from nti.intid.utility import IntIds
-
 from nti.testing.layers import find_test
 from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
@@ -50,6 +48,7 @@ logger = __import__('logging').getLogger(__name__)
 
 
 def install_intids(folder):
+    from nti.intid.utility import IntIds
     lsm = folder.getSiteManager()
     intids = IntIds('_ds_intid', family=BTrees.family64)
     intids.__name__ = '++etc++intids'
@@ -168,7 +167,7 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
                                  GCLayerMixin,
                                  ConfiguringLayerMixin):
 
-    set_up_packages = ('nti.initid',)
+    set_up_packages = ('nti.intid',)
 
     @classmethod
     def db(cls):

@@ -20,6 +20,8 @@ does_not = is_not
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
+from nti.testing.base import AbstractTestBase
+
 import struct
 
 from zc.intid import IIdAddedEvent
@@ -36,8 +38,6 @@ from persistent import Persistent
 from nti.intid.interfaces import IIntIds
 
 from nti.intid.utility import IntIds
-
-from nti.testing.base import AbstractTestBase
 
 
 @interface.implementer(ILocation)

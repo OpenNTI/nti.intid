@@ -18,103 +18,133 @@ from hamcrest import has_property
 from nti.testing.matchers import validly_provides as verifiably_provides
 
 import pickle
+
 import BTrees.OOBTree
 
-# TODO: Break this
-from nti.dataserver.users.users import User
+from persistent import Persistent
+
+from zope import interface
+
+from zope.location.interfaces import ILocation
 
 from nti.intid import wref
 
-from nti.wref import interfaces as nti_interfaces
+from nti.intid.tests import root_name
 
-# TODO: Refactor
-from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
+from nti.intid.tests import WithMockDS
+from nti.intid.tests import IntIdTestCase
 
-from nti.dataserver.tests.mock_dataserver import SharedConfiguringTestBase
+from nti.intid.tests import mock_db_trans
+
+from nti.wref.interfaces import IWeakRef
+from nti.wref.interfaces import ICachingWeakRef
+from nti.wref.interfaces import IWeakRefToMissing
 
 
-class TestIntidWref(SharedConfiguringTestBase):
+@interface.implementer(ILocation)
+class User(Persistent):
 
-    @WithMockDSTrans
+    __parent__ = None
+
+    def __init__(self, username):
+        self.__name__ = username
+
+    @property
+    def username(self):
+        return self.__name__
+
+
+class TestIntidWref(IntIdTestCase):
+
+    def _create_user(self, username, conn=None):
+        user = User(username)
+        if conn is not None:
+            folder = conn.root()[root_name]
+            folder[username] = user
+        return user
+
+    @WithMockDS
     def test_pickle(self):
-        user = User.create_user(username='sjohnson@nextthought.com')
+        with mock_db_trans() as conn:
+            user = self._create_user('sjohnson@nextthought.com', conn)
+            ref = wref.WeakRef(user)
 
-        ref = wref.WeakRef(user)
+            assert_that(ref, has_property('_v_entity_cache', user))
 
-        assert_that(ref, has_property('_v_entity_cache', user))
+            copy = pickle.loads(pickle.dumps(ref))
 
-        copy = pickle.loads(pickle.dumps(ref))
+            assert_that(copy, has_property('_v_entity_cache', none()))
 
-        assert_that(copy, has_property('_v_entity_cache', none()))
+            assert_that(copy(), is_(user))
+            assert_that(ref, is_(copy))
+            assert_that(copy, is_(ref))
+            assert_that(repr(copy), is_(repr(ref)))
+            assert_that(hash(copy), is_(hash(ref)))
 
-        assert_that(copy(), is_(user))
-        assert_that(ref, is_(copy))
-        assert_that(copy, is_(ref))
-        assert_that(repr(copy), is_(repr(ref)))
-        assert_that(hash(copy), is_(hash(ref)))
+            assert_that(ref, verifiably_provides(IWeakRef))
+            assert_that(ref, verifiably_provides(ICachingWeakRef))
+            assert_that(ref, verifiably_provides(IWeakRefToMissing))
 
-        assert_that(ref, verifiably_provides(nti_interfaces.IWeakRef))
-        assert_that(ref, verifiably_provides(nti_interfaces.ICachingWeakRef))
-        assert_that(ref, verifiably_provides(nti_interfaces.IWeakRefToMissing))
-
-    @WithMockDSTrans
+    @WithMockDS
     def test_missing(self):
-        user = User.create_user(username='sjohnson@nextthought.com')
+        with mock_db_trans() as conn:
+            user = self._create_user('sjohnson@nextthought.com', conn)
+            # Cannot find with invalid intid
+            ref = wref.WeakRef(user)
+            setattr(ref, '_v_entity_cache', None)
+            setattr(ref, '_entity_id', -1)
+            assert_that(ref(), is_(none()))
 
-        # Cannot find with invalid intid
-        ref = wref.WeakRef(user)
-        setattr(ref, '_v_entity_cache', None)
-        setattr(ref, '_entity_id', -1)
-        assert_that(ref(), is_(none()))
+            # cannot find with invalid oid
+            ref = wref.WeakRef(user)
+            assert_that(ref, has_property('_entity_oid', not_none()))
+            setattr(ref, '_v_entity_cache', None)
+            setattr(ref, '_entity_oid', -1)
+            assert_that(ref(), is_(none()))
 
-        # cannot find with invalid oid
-        ref = wref.WeakRef(user)
-        assert_that(ref, has_property('_entity_oid', not_none()))
-        setattr(ref, '_v_entity_cache', None)
-        setattr(ref, '_entity_oid', -1)
-        assert_that(ref(), is_(none()))
+            # Find it with oid of None (but valid intid)
+            ref = wref.WeakRef(user)
+            assert_that(ref, has_property('_entity_oid', not_none()))
+            setattr(ref, '_v_entity_cache', None)
+            setattr(ref, '_entity_oid', None)
+            assert_that(ref(), is_(user))
 
-        # Find it with oid of None (but valid intid)
-        ref = wref.WeakRef(user)
-        assert_that(ref, has_property('_entity_oid', not_none()))
-        setattr(ref, '_v_entity_cache', None)
-        setattr(ref, '_entity_oid', None)
-        assert_that(ref(), is_(user))
+            # Caching can be controlled
+            ref = wref.WeakRef(user)
+            setattr(ref, '_entity_id', -1)
+            setattr(ref, '_entity_oid', None)
+            assert_that(ref(), is_(user))  # From cache
 
-        # Caching can be controlled
-        ref = wref.WeakRef(user)
-        setattr(ref, '_entity_id', -1)
-        setattr(ref, '_entity_oid', None)
-        assert_that(ref(), is_(user))  # From cache
+            assert_that(ref(allow_cached=False), is_(none()))  # not from cache
 
-        assert_that(ref(allow_cached=False), is_(none()))  # not from cache
-
-    @WithMockDSTrans
+    @WithMockDS
     def test_in_btree(self):
-        user = User.create_user(username='sjohnson@nextthought.com')
-        user2 = User.create_user(username='sjohnson2@nextthought.com')
+        with mock_db_trans() as conn:
+            user_1 = self._create_user('sjohnson@nextthought.com', conn)
+            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
 
-        bt = BTrees.OOBTree.OOBTree()
+            bt = BTrees.OOBTree.OOBTree()
 
-        ref = wref.ArbitraryOrderableWeakRef(user)
-        ref2 = wref.ArbitraryOrderableWeakRef(user2)
+            ref_1 = wref.ArbitraryOrderableWeakRef(user_1)
+            ref_2 = wref.ArbitraryOrderableWeakRef(user_2)
 
-        bt[ref] = 1
-        bt[ref2] = 2
+            bt[ref_1] = 1
+            bt[ref_2] = 2
 
-        assert_that(bt[ref], is_(1))
-        assert_that(bt[ref2], is_(2))
+            assert_that(bt[ref_1], is_(1))
+            assert_that(bt[ref_2], is_(2))
 
-        assert_that(bt.get('foo'), is_(none()))
+            assert_that(bt.get('foo'), is_(none()))
 
-    @WithMockDSTrans
+    @WithMockDS
     def test_eq_ne(self):
-        user = User.create_user(username='sjohnson@nextthought.com')
-        user2 = User.create_user(username='sjohnson2@nextthought.com')
+        with mock_db_trans() as conn:
+            user_1 = self._create_user('sjohnson@nextthought.com', conn)
+            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
 
-        ref = wref.ArbitraryOrderableWeakRef(user)
-        ref2 = wref.ArbitraryOrderableWeakRef(user2)
+            ref_1 = wref.ArbitraryOrderableWeakRef(user_1)
+            ref_2 = wref.ArbitraryOrderableWeakRef(user_2)
 
-        assert_that(ref, is_(ref))
-        assert_that(ref2, is_not(ref))
-        assert_that(ref, is_not(ref2))
+            assert_that(ref_1, is_(ref_1))
+            assert_that(ref_2, is_not(ref_1))
+            assert_that(ref_1, is_not(ref_2))
