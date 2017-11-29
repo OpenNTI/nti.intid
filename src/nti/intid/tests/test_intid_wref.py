@@ -49,10 +49,6 @@ class User(Persistent):
     def __init__(self, username):
         self.__name__ = username
 
-    @property
-    def username(self):
-        return self.__name__
-
 
 class TestIntidWref(IntIdTestCase):
 

@@ -15,6 +15,7 @@ from hamcrest import raises
 from hamcrest import calling
 from hamcrest import has_length
 from hamcrest import assert_that
+from hamcrest import has_property
 does_not = is_not
 
 from nti.testing.matchers import validly_provides
@@ -26,6 +27,8 @@ import struct
 
 from zc.intid import IIdAddedEvent
 from zc.intid import IIdRemovedEvent
+
+from zc.intid.interfaces import IntIdInUseError
 
 from zope import interface
 
@@ -69,8 +72,10 @@ class TestUtility(AbstractTestBase):
         eventtesting.setUp()
 
     def test_interface(self):
-        assert_that(IntIds("_ds_id"), validly_provides(IIntIds))
-        assert_that(IntIds("_ds_id"), verifiably_provides(IIntIds))
+        u = IntIds("_ds_id")
+        assert_that(u, validly_provides(IIntIds))
+        assert_that(u, verifiably_provides(IIntIds))
+        assert_that(repr(u), is_not(none()))
 
     def test_non_keyreferences(self):
         u = IntIds("_ds_id")
@@ -79,11 +84,16 @@ class TestUtility(AbstractTestBase):
         assert_that(u.unregister(obj), is_(none()))
         assert_that(calling(u.getId).with_args(obj), raises(KeyError))
 
-    def _test_ops(self):
+    def test_event(self):
         u = IntIds("_ds_id")
 
         obj = P()
-        obj._p_jar = ConnectionStub()
+        stub = ConnectionStub()
+        stub.add(obj)
+        assert_that(stub.db(), is_(stub))
+
+        assert_that(obj, 
+                    has_property('_p_jar', is_(stub)))
 
         count = 1
         assert_that(calling(u.getId).with_args(obj), raises(KeyError))
@@ -110,5 +120,24 @@ class TestUtility(AbstractTestBase):
         assert_that(calling(u.getId).with_args(obj), raises(KeyError))
         assert_that(eventtesting.getEvents(IIdRemovedEvent), has_length(count))
 
-    def test_event(self):
-        self._test_ops()
+        next_id = u._v_nextid
+        assert_that(u.randomize(), is_not(next_id))
+
+    def test_force(self):
+        u = IntIds("_ds_id")
+        obj = P()
+        obj._ds_id = 100
+        stub = ConnectionStub()
+        stub.add(obj)
+        
+        u.force_register(100, obj)
+        assert_that(calling(u.force_register).with_args(100, P()), 
+                    raises(IntIdInUseError))
+        
+        assert_that(calling(u.force_unregister).with_args(200, obj), 
+                    raises(KeyError))
+
+        assert_that(calling(u.force_unregister).with_args(100, P()), 
+                    raises(KeyError))
+
+        u.force_unregister(100, obj, True)
