@@ -10,6 +10,9 @@ entry_points = {
 TESTS_REQUIRE = [
     'fudge',
     'nti.testing',
+    'persistent',
+    'transaction',
+    'ZODB',
     'zope.dottedname',
     'zope.testrunner',
 ]
@@ -59,7 +62,6 @@ setup(
         'nti.externalization',
         'nti.ntiids',
         'nti.wref',
-        'six',
         'zc.intid',
         'zope.component',
         'zope.deferredimport',
