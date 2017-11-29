@@ -90,7 +90,8 @@ class TestIntidWref(IntIdTestCase):
             setattr(ref, '_v_entity_cache', None)
             setattr(ref, '_entity_id', -1)
             assert_that(ref(), is_(none()))
-
+            assert_that(ref.make_missing_ntiid(),
+                        is_('tag:nextthought.com,2011-10:Missing'))
             # cannot find with invalid oid
             ref = wref.WeakRef(user)
             assert_that(ref, has_property('_entity_oid', not_none()))
@@ -112,6 +113,13 @@ class TestIntidWref(IntIdTestCase):
             assert_that(ref(), is_(user))  # From cache
 
             assert_that(ref(allow_cached=False), is_(none()))  # not from cache
+            
+    @WithMockDS
+    def test_no_caching(self):
+        with mock_db_trans() as conn:
+            user = self._create_user('sjohnson@nextthought.com', conn)
+            ref = wref.NoCachingArbitraryOrderableWeakRef(user)
+            assert_that(ref(), is_not(none()))
 
     @WithMockDS
     def test_in_btree(self):
@@ -119,16 +127,19 @@ class TestIntidWref(IntIdTestCase):
             user_1 = self._create_user('sjohnson@nextthought.com', conn)
             user_2 = self._create_user('sjohnson2@nextthought.com', conn)
 
-            bt = BTrees.OOBTree.OOBTree()
-
-            ref_1 = wref.ArbitraryOrderableWeakRef(user_1)
-            ref_2 = wref.ArbitraryOrderableWeakRef(user_2)
-
-            bt[ref_1] = 1
-            bt[ref_2] = 2
-
-            assert_that(bt[ref_1], is_(1))
-            assert_that(bt[ref_2], is_(2))
+            for clazz in (wref.NoCachingArbitraryOrderableWeakRef,
+                          wref.ArbitraryOrderableWeakRef, 
+                          wref.WeakRef):
+                bt = BTrees.OOBTree.OOBTree()
+    
+                ref_1 = clazz(user_1)
+                ref_2 = clazz(user_2)
+    
+                bt[ref_1] = 1
+                bt[ref_2] = 2
+    
+                assert_that(bt[ref_1], is_(1))
+                assert_that(bt[ref_2], is_(2))
 
     @WithMockDS
     def test_eq_ne(self):
@@ -142,3 +153,7 @@ class TestIntidWref(IntIdTestCase):
             assert_that(ref_1, is_(ref_1))
             assert_that(ref_2, is_not(ref_1))
             assert_that(ref_1, is_not(ref_2))
+
+            assert_that(ref_1 != ref_1, is_(False))
+            assert_that(ref_1 != ref_2, is_(True))
+            assert_that(ref_1 != object(), is_(True))
