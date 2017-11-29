@@ -109,9 +109,9 @@ class mock_db_trans(object):
             try:
                 if not transaction.isDoomed():
                     transaction.commit()
-                else:
+                else:  # pragma: no cover
                     transaction.abort()
-            except Exception:
+            except Exception:  # pragma: no cover
                 transaction.abort()
                 raise
             finally:
@@ -152,15 +152,12 @@ def _mock_ds_wrapper_for(func, db, teardown=None):
     return f
 
 
-def WithMockDS(*args, **kwargs):
+def WithMockDS(*args):
     def teardown():
         return None
     db = ZODB.DB(DemoStorage(name='Users'))
-    if len(args) == 1 and not kwargs:
-        # Being used as a plain decorator
-        func = args[0]
-        return _mock_ds_wrapper_for(func, db, teardown)
-    return lambda func: _mock_ds_wrapper_for(func, db, teardown)
+    func = args[0]
+    return _mock_ds_wrapper_for(func, db, teardown)
 
 
 class SharedConfiguringTestLayer(ZopeComponentLayer,
