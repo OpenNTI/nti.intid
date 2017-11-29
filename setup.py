@@ -14,6 +14,7 @@ TESTS_REQUIRE = [
     'transaction',
     'ZODB',
     'zope.dottedname',
+    'zope.site',
     'zope.testrunner',
 ]
 

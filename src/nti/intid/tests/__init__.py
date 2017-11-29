@@ -5,8 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904,W0603,W0703,W0221
+# pylint: disable=W0212,R0904,W0603,W0703,W0221,E1101
 
 from hamcrest import assert_that
 
@@ -15,6 +14,15 @@ from nti.testing.matchers import provides
 import functools
 import transaction
 
+import BTrees
+
+import zc.intid
+
+import ZODB
+
+from ZODB.DemoStorage import DemoStorage
+
+import zope.intid
 import zope.testing.cleanup
 
 from zope import component
@@ -22,9 +30,12 @@ from zope import component
 from zope.component.hooks import setHooks
 from zope.component.hooks import site as currentSite
 
-import ZODB
+from zope.site import LocalSiteManager
+from zope.site import SiteManagerContainer
 
-from ZODB.DemoStorage import DemoStorage
+from zope.site.folder import rootFolder
+
+from nti.intid.utility import IntIds
 
 from nti.testing.layers import find_test
 from nti.testing.layers import GCLayerMixin
@@ -33,8 +44,30 @@ from nti.testing.layers import ConfiguringLayerMixin
 
 current_mock_db = None
 current_transaction = None
+root_name = 'nti.dataserver'
 
 logger = __import__('logging').getLogger(__name__)
+
+
+def install_intids(folder):
+    lsm = folder.getSiteManager()
+    intids = IntIds('_ds_intid', family=BTrees.family64)
+    intids.__name__ = '++etc++intids'
+    intids.__parent__ = folder
+    lsm.registerUtility(intids, provided=zope.intid.IIntIds)
+    lsm.registerUtility(intids, provided=zc.intid.IIntIds)
+    return intids
+
+
+def install_main(conn):
+    root = conn.root()
+    root_folder = rootFolder()
+    conn.add(root_folder)
+    root_sm = LocalSiteManager(root_folder)
+    conn.add(root_sm)
+    root_folder.setSiteManager(root_sm)
+    root[root_name] = root_folder
+    install_intids(root_folder)
 
 
 def init_db(db, conn=None):
@@ -42,6 +75,7 @@ def init_db(db, conn=None):
     global current_transaction
     if current_transaction != conn:
         current_transaction = conn
+    install_main(conn)
     return conn
 
 
@@ -49,16 +83,27 @@ class mock_db_trans(object):
 
     def __init__(self, db=None):
         self.conn = None
+        self._site_cm = None
         self.db = db or current_mock_db
+
+    def _check(self, conn):
+        root = conn.root()
+        if root_name not in root:
+            install_main(conn)
 
     def __enter__(self):
         transaction.begin()
         self.conn = conn = self.db.open()
         global current_transaction
         current_transaction = conn
+        self._check(conn)
+        sitemanc = conn.root()[root_name]
+        self._site_cm = currentSite(sitemanc)
+        self._site_cm.__enter__()
         return conn
 
-    def __exit__(self, t, unused_v, unused_tb):
+    def __exit__(self, t, v, tb):
+        result = self._site_cm.__exit__(t, v, tb)
         global current_transaction
         body_raised = t is not None
         try:
@@ -78,6 +123,7 @@ class mock_db_trans(object):
                 raise
             logger.exception("Failed to cleanup trans")
         reset_db_caches(self.db)
+        return result
 
 
 def reset_db_caches(db=None):
@@ -93,13 +139,17 @@ def _mock_ds_wrapper_for(func, db, teardown=None):
         current_mock_db = db
         init_db(db)
 
-        try:
-            func(*args)
-        finally:
-            current_mock_db = None
-            if teardown:
-                teardown()
+        sitemanc = SiteManagerContainer()
+        sitemanc.setSiteManager(LocalSiteManager(None))
 
+        with currentSite(sitemanc):
+            assert component.getSiteManager() == sitemanc.getSiteManager()
+            try:
+                func(*args)
+            finally:
+                current_mock_db = None
+                if teardown:
+                    teardown()
     return f
 
 
@@ -146,6 +196,7 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
 
 
 import unittest
+
 
 class IntIdTestCase(unittest.TestCase):
     layer = SharedConfiguringTestLayer
