@@ -113,7 +113,7 @@ class TestIntidWref(IntIdTestCase):
             assert_that(ref(), is_(user))  # From cache
 
             assert_that(ref(allow_cached=False), is_(none()))  # not from cache
-            
+
     @WithMockDS
     def test_no_caching(self):
         with mock_db_trans() as conn:
@@ -128,16 +128,16 @@ class TestIntidWref(IntIdTestCase):
             user_2 = self._create_user('sjohnson2@nextthought.com', conn)
 
             for clazz in (wref.NoCachingArbitraryOrderableWeakRef,
-                          wref.ArbitraryOrderableWeakRef, 
+                          wref.ArbitraryOrderableWeakRef,
                           wref.WeakRef):
                 bt = BTrees.OOBTree.OOBTree()
-    
+
                 ref_1 = clazz(user_1)
                 ref_2 = clazz(user_2)
-    
+
                 bt[ref_1] = 1
                 bt[ref_2] = 2
-    
+
                 assert_that(bt[ref_1], is_(1))
                 assert_that(bt[ref_2], is_(2))
 
