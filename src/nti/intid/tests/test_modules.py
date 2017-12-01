@@ -26,5 +26,4 @@ class TestModules(unittest.TestCase):
             for name in ('', '.datastructures'):
                 new_loc = location + name
                 sys.modules[new_loc] = types.ModuleType(new_loc, "Created module")
-            sys.modules[location] = types.ModuleType(location, "Created module")
         dottedname.resolve('nti.intid.containers')
