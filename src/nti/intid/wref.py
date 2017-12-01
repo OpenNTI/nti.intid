@@ -19,10 +19,10 @@ from __future__ import absolute_import
 import warnings
 import functools
 
+from zc.intid import IIntIds
+
 from zope import component
 from zope import interface
-
-from zc.intid import IIntIds
 
 from nti.externalization.integer_strings import to_external_string
 

@@ -8,10 +8,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from zope.location.interfaces import IContained
-
 from zc.intid.interfaces import IIntIdsSubclass
 from zc.intid.interfaces import IIntIds as IZCIIntIds
+
+from zope.location.interfaces import IContained
 
 import zope.deferredimport
 zope.deferredimport.initialize()

@@ -17,16 +17,16 @@ from Acquisition import aq_base
 
 import BTrees
 
+from zc.intid.interfaces import RemovedEvent
+from zc.intid.interfaces import IntIdInUseError
+
+from zc.intid.utility import IntIds as _ZCIntIds
+
 from zope import interface
 
 from zope.event import notify as zope_notify
 
 from zope.security.proxy import removeSecurityProxy as unwrap
-
-from zc.intid.interfaces import RemovedEvent
-from zc.intid.interfaces import IntIdInUseError
-
-from zc.intid.utility import IntIds as _ZCIntIds
 
 from nti.intid.interfaces import IIntIds
 
