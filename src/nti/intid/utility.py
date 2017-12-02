@@ -80,7 +80,7 @@ class IntIds(_ZCIntIds):
         logger.debug('%s was registered with intid %s', type(ob), result)
         return result
 
-    def unregister(self, ob):
+    def unregister(self, ob, *unused_args, **unused_kwargs):
         return _ZCIntIds.unregister(self, aq_base(ob))
 
     def getId(self, ob):
