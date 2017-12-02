@@ -13,6 +13,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+# pylint: disable=W0221
+
 from Acquisition import aq_base
 
 import BTrees
@@ -73,7 +75,7 @@ class IntIds(_ZCIntIds):
         """
         return _ZCIntIds.queryId(self, aq_base(ob), default=default)
 
-    def register(self, ob):
+    def register(self, ob, *unused_args, **unused_kwargs):
         result = _ZCIntIds.register(self, aq_base(ob))
         logger.debug('%s was registered with intid %s', type(ob), result)
         return result
