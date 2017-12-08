@@ -5,7 +5,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=W0212,R0904,W0603,W0703,W0221,E1101
+# pylint: disable=protected-access,too-many-public-methods
+# pylint: disable=global-statement,broad-except
+# pylint: disable=arguments-differ,no-member
 
 from hamcrest import assert_that
 
