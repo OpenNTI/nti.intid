@@ -13,8 +13,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=arguments-differ
-
 from Acquisition import aq_base
 
 import BTrees
@@ -73,13 +71,15 @@ class IntIds(_ZCIntIds):
 
         We do not change this for backwards compatibility.
         """
-        return _ZCIntIds.queryId(self, aq_base(ob), default=default)
+        return _ZCIntIds.queryId(self, aq_base(ob), default)
 
+    # pylint: disable=arguments-differ
     def register(self, ob, *unused_args, **unused_kwargs):
         result = _ZCIntIds.register(self, aq_base(ob))
         logger.debug('%s was registered with intid %s', type(ob), result)
         return result
 
+    # pylint: disable=arguments-differ
     def unregister(self, ob, *unused_args, **unused_kwargs):
         return _ZCIntIds.unregister(self, aq_base(ob))
 

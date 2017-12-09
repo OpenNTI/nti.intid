@@ -5,7 +5,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=protected-access,too-many-public-methods,attribute-defined-outside-init
+# pylint: disable=protected-access,too-many-public-methods
+# pylint: disable=attribute-defined-outside-init
 
 from hamcrest import is_
 from hamcrest import none

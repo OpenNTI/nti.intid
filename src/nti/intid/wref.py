@@ -14,8 +14,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=protected-access
-
 import warnings
 import functools
 
@@ -92,6 +90,7 @@ class _AbstractWeakRef(object):
     def __eq__(self, other):
         if self is other:
             return True
+        # pylint: disable=protected-access
         try:
             if self._entity_id == other._entity_id:
                 return self._entity_oid == other._entity_oid \
@@ -169,12 +168,14 @@ class ArbitraryOrderableWeakRef(WeakRef):
     """
 
     def __lt__(self, other):
+        # pylint: disable=protected-access
         try:
             return (self._entity_id, self._entity_oid) < (other._entity_id, other._entity_oid)
         except AttributeError:  # pragma: no cover
             return NotImplemented
 
     def __gt__(self, other):
+        # pylint: disable=protected-access
         try:
             return (self._entity_id, self._entity_oid) > (other._entity_id, other._entity_oid)
         except AttributeError:  # pragma: no cover
