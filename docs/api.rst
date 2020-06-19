@@ -2,32 +2,28 @@
  Reference
 ===========
 
-Common
-======
-
-.. automodule:: nti.intid.common
-
-Containers
-==========
-
-.. automodule:: nti.intid.containers
-
-Interfaces
-==========
+nti.intid.interfaces
+====================
 
 .. automodule:: nti.intid.interfaces
 
-Subscribers
-===========
+
+nti.intid.common
+================
+
+.. automodule:: nti.intid.common
+
+nti.intid.subscribers
+=====================
 
 .. automodule:: nti.intid.subscribers
 
-Utility
-=======
+nti.intid.utility
+=================
 
 .. automodule:: nti.intid.utility
 
-Weak Refs
-=========
+nti.intid.wref
+==============
 
 .. automodule:: nti.intid.wref

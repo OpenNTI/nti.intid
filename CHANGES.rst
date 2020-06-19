@@ -3,7 +3,7 @@
 =========
 
 
-1.0.0 (unreleased)
+0.0.1 (unreleased)
 ==================
 
-- Add support for Python 3.
+- First PyPI release.

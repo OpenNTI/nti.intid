@@ -30,14 +30,22 @@ rqmt = pkg_resources.require('nti.intid')[0]
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
+# 1.8 was the last version that runs on Python 2; 2.0+ requires Python 3.
+# `autodoc_default_options` was new in 1.8
+needs_sphinx = "1.8"
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.coverage',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
     'sphinx.ext.viewcode',
+
     'repoze.sphinx.autointerface',
 ]
 
@@ -85,6 +93,8 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# The reST default role (used for this markup: `text`) to use for all documents.
+default_role = 'obj'
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -176,6 +186,12 @@ extlinks = {
     'pr': ('https://github.com/NextThought/nti.intid/pull/%s',
            'pull request #')}
 
-autodoc_default_flags = ['members', 'show-inheritance']
+# Sphinx 1.8+ prefers this to `autodoc_default_flags`. It's documented that
+# either True or None mean the same thing as just setting the flag, but
+# only None works in 1.8 (True works in 2.0)
+autodoc_default_options = {
+    'members': None,
+    'show-inheritance': None,
+}
+autodoc_member_order = 'groupwise'
 autoclass_content = 'both'
-autodoc_member_order = 'bysource'

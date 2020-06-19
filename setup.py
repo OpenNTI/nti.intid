@@ -8,11 +8,12 @@ entry_points = {
 }
 
 TESTS_REQUIRE = [
+    'ZODB',
     'fudge',
+    'nti.site',
     'nti.testing',
     'persistent',
     'transaction',
-    'ZODB',
     'zope.dottedname',
     'zope.site',
     'zope.testrunner',
@@ -26,26 +27,29 @@ def _read(fname):
 
 setup(
     name='nti.intid',
-    version=_read('version.txt').strip(),
+    version='0.0.1.dev0',
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI intid",
+    description="Extensions for Zope3's intids.",
     long_description=(
         _read('README.rst')
         + '\n\n'
         + _read("CHANGES.rst")
     ),
     license='Apache',
-    keywords='intid',
+    keywords='intid zope3',
     classifiers=[
         'Framework :: Zope3',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
+        'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
@@ -57,12 +61,12 @@ setup(
     namespace_packages=['nti'],
     tests_require=TESTS_REQUIRE,
     install_requires=[
-        'setuptools',
         'Acquisition',
         'BTrees',
         'nti.externalization',
         'nti.ntiids',
         'nti.wref',
+        'setuptools',
         'zc.intid',
         'zope.component',
         'zope.deferredimport',
