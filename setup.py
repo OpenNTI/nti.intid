@@ -28,7 +28,7 @@ def _read(fname):
 
 setup(
     name='nti.intid',
-    version='0.0.1.dev0',
+    version='0.0.1',
     author='Jason Madden',
     author_email='jason@nextthought.com',
     description="Extensions for Zope3's intids.",
