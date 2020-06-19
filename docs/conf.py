@@ -178,6 +178,12 @@ texinfo_documents = [
 intersphinx_mapping = {
     'https://docs.python.org/': None,
     'https://persistent.readthedocs.io/en/latest': None,
+    'https://acquisition.readthedocs.io/en/latest': None,
+    'https://zcintid.readthedocs.io/en/latest': None,
+    'https://zopeintid.readthedocs.io/en/latest': None,
+    'https://zopelocation.readthedocs.io/en/latest': None,
+    'https://btrees.readthedocs.io/en/latest': None,
+    'https://zodb-docs.readthedocs.io/en/latest': None,
 }
 
 extlinks = {

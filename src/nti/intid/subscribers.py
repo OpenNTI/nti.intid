@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. $Id$
+Subscribers for events.
+
+These are configured by loading this packages's ``configure.zcml``.
 """
 
 from __future__ import division
@@ -14,12 +16,14 @@ from zope.component import handle
 
 from zc.intid.interfaces import ISubscriberEvent
 
-logger = __import__('logging').getLogger(__name__)
-
 
 @component.adapter(ISubscriberEvent)
 def subscriberEventNotify(event):
     """
-    Event subscriber to dispatch ISubscriberEvent to interested adapters.
+    Event subscriber to dispatch
+    :class:`zc.intid.interfaces.ISubscriberEvent` to interested
+    adapters.
+
+    The adapters are registered on ``event.object, event``.
     """
     handle(event.object, event)

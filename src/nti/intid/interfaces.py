@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. $Id$
+Interfaces for working with integer IDs.
 """
 
 from __future__ import division
@@ -29,29 +29,41 @@ zope.deferredimport.deprecated(
     IntIdAddedEvent='zc.intid.interfaces:AfterIdAddedEvent',
     IntIdRemovedEvent='zc.intid.interfaces:BeforeIdRemovedEvent')
 
+# pylint:disable=no-method-argument,no-self-argument
 
 class IIntIds(IZCIIntIds, IIntIdsSubclass, IContained):
+    """
+    Advanced extensions to an integer ID catalog.
+
+    Normal users will have no need of this interface.
+    """
 
     def randomize():
         """
-        Randomize the next id
+        Randomize the next id.
+
+        Do not use this method.
         """
 
     def force_register(uid, ob, check=True):
         """
-        Register an object
+        Register an object.
 
-        :param uid. Registration id
-        :param ob. Object to register
-        :param check. Validation check flag
+        Do not use this method.
+
+        :param uid: Registration id
+        :param ob: Object to register
+        :param check: Validation check flag
         """
 
     def force_unregister(uid, ob=None, notify=False, remove_attribute=True):
         """
-        Unregister an object
+        Unregister an object.
 
-        :param uid. Id to unregister
-        :param ob. Obj to unregister [optional]
-        :param notify. Flag to trigger an ``IIdRemovedEvent``
-        :param notremove_attribute. Flag to remove intid attribute
+        Do not use this method.
+
+        :param uid: Id to unregister
+        :param ob: Obj to unregister [optional]
+        :param notify: Flag to trigger an ``IIdRemovedEvent``
+        :param notremove_attribute: Flag to remove intid attribute
         """

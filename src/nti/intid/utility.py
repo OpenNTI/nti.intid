@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Contains a :mod:`zc.intid.utility` derived utility for
-managing intids. The primary reason to do this
-is to provide better exceptions, and future proofing
-of behaviour.
-
-.. $Id$
+Contains a :mod:`zc.intid.utility` derived utility for managing
+intids. The primary reason to do this is to provide better exceptions,
+and future proofing of behaviour.
 """
 
 from __future__ import division
@@ -30,7 +27,6 @@ from zope.security.proxy import removeSecurityProxy as unwrap
 
 from nti.intid.interfaces import IIntIds
 
-logger = __import__('logging').getLogger(__name__)
 
 import zope.deferredimport
 zope.deferredimport.initialize()
@@ -40,18 +36,27 @@ zope.deferredimport.deprecated(
     ObjectMissingError='zope.intid.interfaces:ObjectMissingError')
 
 
+logger = __import__('logging').getLogger(__name__)
+
 @interface.implementer(IIntIds)
 class IntIds(_ZCIntIds):
+    """
+    A integer ID utility that uses 64-bit values.
+
+    Implements :class:`nti.intid.interfaces.IIntIds`
+    """
 
     __name__ = None
     __parent__ = None
 
+    #: The family of BTrees to use.
     family = BTrees.family64
 
     # Because this object stores IDs using attributes on the object,
     # it is important to be sure that the ID is not acquired
     # from a parent. Hence, all the methods use aq_base to unwrap
     # the object.
+    #
     # Removing all proxies in general is more tricky; sometimes a
     # zope.container.contained.ContainedProxy is really what we want to register.
     # Fortunately, most proxies pass attributes on through to the underlying
@@ -63,27 +68,46 @@ class IntIds(_ZCIntIds):
 
     def queryId(self, ob, default=None):
         """
-        NOTE: if you pass a broken object (in the ZODB sense),
-        this will hide that fact. We have to activate it,
-        but if it is broken, we will not be able to. However,
-        we catch KeyError, which is a superclass of the POSKeyError
-        that gets thrown, so you cannot distinguish it at this point.
+        Query for the id of the :func:`Acquisition.aq_base` of *ob*.
 
-        We do not change this for backwards compatibility.
+        .. note::
+
+            If you pass a broken object (in the ZODB sense), this
+            will hide that fact. We have to activate it, but if it is
+            broken, we will not be able to. However, we catch
+            :exc:`KeyError`, which is a superclass of the
+            :exc:`~.POSKeyError` that gets thrown, so you cannot
+            distinguish it at this point.
+
+            We do not change this for backwards compatibility.
         """
         return _ZCIntIds.queryId(self, aq_base(ob), default)
 
-    # pylint: disable=arguments-differ
     def register(self, ob, *unused_args, **unused_kwargs):
+        """
+        register(object) -> int
+
+        Register the :func:`Acquisition.aq_base` of *object* and return the integer id.
+        """
         result = _ZCIntIds.register(self, aq_base(ob))
-        logger.debug('%s was registered with intid %s', type(ob), result)
+        # 5 = ZODB.loglevels.TRACE
+        logger.log(5, '%s was registered with intid %s', type(ob), result)
         return result
 
-    # pylint: disable=arguments-differ
     def unregister(self, ob, *unused_args, **unused_kwargs):
+        """
+        unregister(object) -> None
+
+        Unregister the :func:`Acquisition.aq_base` of *object*.
+        """
         return _ZCIntIds.unregister(self, aq_base(ob))
 
     def getId(self, ob):
+        """
+        Get the id of the :func:`Acquisition.aq_base` of *ob*.
+
+        See the note for :meth:`queryId`.
+        """
         return _ZCIntIds.getId(self, aq_base(ob))
     get_id = getId
 
