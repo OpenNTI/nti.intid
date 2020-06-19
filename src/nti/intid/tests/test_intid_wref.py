@@ -33,9 +33,8 @@ from nti.intid import wref
 from nti.intid.tests import IntIdTestCase
 from nti.intid.tests import WithMockDS
 from nti.intid.tests import mock_db_trans
-from nti.intid.tests import root_name
 
-
+root_name = str(mock_db_trans.main_application_folder_name)
 
 @interface.implementer(ILocation)
 class User(Persistent):
@@ -191,10 +190,8 @@ class TestIntidWref(IntIdTestCase):
 
     @WithMockDS
     def test_no_dict(self):
-        import warnings
         with mock_db_trans() as conn:
             user_1 = self._create_user('sjohnson@nextthought.com', conn)
-            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
 
             for clazz in (wref.NoCachingArbitraryOrderableWeakRef,
                           wref.ArbitraryOrderableWeakRef,
