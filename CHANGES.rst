@@ -3,7 +3,7 @@
 =========
 
 
-0.0.2 (unreleased)
+0.0.2 (2020-06-19)
 ==================
 
 - Refactor tests to use ``nti.site.testing`` for DB and site management.
