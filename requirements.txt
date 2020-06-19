@@ -1,1 +1,0 @@
--e git+https://github.com/NextThought/nti.ntiids.git@master#egg=nti.ntiids
