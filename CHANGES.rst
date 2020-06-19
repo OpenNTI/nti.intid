@@ -7,3 +7,6 @@
 ==================
 
 - First PyPI release.
+
+- The weak ref classes no longer have dictionaries for arbitrary
+  attributes. They never persisted arbitrary attributes.

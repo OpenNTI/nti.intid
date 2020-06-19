@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 # pylint: disable=protected-access,too-many-public-methods
+import pickle
 
 from hamcrest import is_
 from hamcrest import none
@@ -13,31 +14,27 @@ from hamcrest import is_not
 from hamcrest import not_none
 from hamcrest import assert_that
 from hamcrest import has_property
+from hamcrest import has_length
+
+import BTrees.OOBTree # pylint:disable=no-name-in-module,import-error
+
+from persistent import Persistent
+from zope import interface
+from zope.location.interfaces import ILocation
+
+from nti.wref.interfaces import ICachingWeakRef
+from nti.wref.interfaces import IWeakRef
+from nti.wref.interfaces import IWeakRefToMissing
+
 
 from nti.testing.matchers import validly_provides as verifiably_provides
 
-import pickle
-
-import BTrees.OOBTree
-
-from persistent import Persistent
-
-from zope import interface
-
-from zope.location.interfaces import ILocation
-
 from nti.intid import wref
-
+from nti.intid.tests import IntIdTestCase
+from nti.intid.tests import WithMockDS
+from nti.intid.tests import mock_db_trans
 from nti.intid.tests import root_name
 
-from nti.intid.tests import WithMockDS
-from nti.intid.tests import IntIdTestCase
-
-from nti.intid.tests import mock_db_trans
-
-from nti.wref.interfaces import IWeakRef
-from nti.wref.interfaces import ICachingWeakRef
-from nti.wref.interfaces import IWeakRefToMissing
 
 
 @interface.implementer(ILocation)
@@ -122,6 +119,7 @@ class TestIntidWref(IntIdTestCase):
 
     @WithMockDS
     def test_in_btree(self):
+        import warnings
         with mock_db_trans() as conn:
             user_1 = self._create_user('sjohnson@nextthought.com', conn)
             user_2 = self._create_user('sjohnson2@nextthought.com', conn)
@@ -129,16 +127,16 @@ class TestIntidWref(IntIdTestCase):
             for clazz in (wref.NoCachingArbitraryOrderableWeakRef,
                           wref.ArbitraryOrderableWeakRef,
                           wref.WeakRef):
-                bt = BTrees.OOBTree.OOBTree()
+                bt = BTrees.OOBTree.OOBTree() # pylint:disable=no-member
 
                 ref_1 = clazz(user_1)
                 ref_2 = clazz(user_2)
+                with warnings.catch_warnings(record=True):
+                    bt[ref_1] = 1
+                    bt[ref_2] = 2
 
-                bt[ref_1] = 1
-                bt[ref_2] = 2
-
-                assert_that(bt[ref_1], is_(1))
-                assert_that(bt[ref_2], is_(2))
+                    assert_that(bt[ref_1], is_(1))
+                    assert_that(bt[ref_2], is_(2))
 
     @WithMockDS
     def test_eq_ne(self):
@@ -153,6 +151,56 @@ class TestIntidWref(IntIdTestCase):
             assert_that(ref_2, is_not(ref_1))
             assert_that(ref_1, is_not(ref_2))
 
-            assert_that(ref_1 != ref_1, is_(False))
+            assert_that(ref_1 != ref_1, is_(False)) # pylint:disable=comparison-with-itself
             assert_that(ref_1 != ref_2, is_(True))
             assert_that(ref_1 != object(), is_(True))
+
+    @WithMockDS
+    def test_non_orderable_weakref_generates_warnings(self):
+        import warnings
+        import operator
+        with mock_db_trans() as conn:
+            user_1 = self._create_user('sjohnson@nextthought.com', conn)
+            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
+
+            ref_1 = wref.WeakRef(user_1)
+            ref_2 = wref.WeakRef(user_2)
+
+            with warnings.catch_warnings(record=True) as warns:
+                operator.lt(ref_1, ref_2)
+
+            assert_that(warns, has_length(1))
+
+            with warnings.catch_warnings(record=True) as warns:
+                operator.gt(ref_1, ref_2)
+
+            assert_that(warns, has_length(1))
+
+    @WithMockDS
+    def test_arbitrary_orderable_weakref(self):
+        import operator
+        with mock_db_trans() as conn:
+            user_1 = self._create_user('sjohnson@nextthought.com', conn)
+            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
+
+            ref_1 = wref.ArbitraryOrderableWeakRef(user_1)
+            ref_2 = wref.ArbitraryOrderableWeakRef(user_2)
+
+            operator.lt(ref_1, ref_2)
+            operator.gt(ref_1, ref_2)
+
+    @WithMockDS
+    def test_no_dict(self):
+        import warnings
+        with mock_db_trans() as conn:
+            user_1 = self._create_user('sjohnson@nextthought.com', conn)
+            user_2 = self._create_user('sjohnson2@nextthought.com', conn)
+
+            for clazz in (wref.NoCachingArbitraryOrderableWeakRef,
+                          wref.ArbitraryOrderableWeakRef,
+                          wref.WeakRef):
+                __traceback_info__ = clazz
+                ref = clazz(user_1)
+                self.assertFalse(hasattr(ref, '__dict__'))
+                with self.assertRaises(AttributeError):
+                    setattr(ref, 'arbitrary_attribute', None)

@@ -45,7 +45,7 @@ class _AbstractWeakRef(object):
     object's OID (if it has one) in the second. This isn't foolproof,
     but should to pretty good. The third is used for caching.
     Subclasses will need to decide how to implement ``__getstate__``
-    and ``__setstate__``. If subclasses need a __dict__, they will have
+    and ``__setstate__``. If subclasses need a ``__dict__``, they will have
     to declare that in ``__slots__.``
     """
 
@@ -95,6 +95,7 @@ class _AbstractWeakRef(object):
             if self._entity_id == other._entity_id:
                 return self._entity_oid == other._entity_oid \
                     or self._entity_oid is None
+            return False
         except AttributeError:  # pragma: no cover
             return NotImplemented
 
@@ -139,6 +140,8 @@ class WeakRef(_AbstractWeakRef):
     total ordering!)
     """
 
+    __slots__ = ()
+
     def __getstate__(self):
         return self._entity_id, self._entity_oid
 
@@ -148,15 +151,20 @@ class WeakRef(_AbstractWeakRef):
 
     # We are not orderable. Hopefully there is no data like this in the real
     # world, but we did have tests relying on it. Try to catch it here,
-    # doing what python would have done itself.
+    # doing what Python 2 would have done itself (Python 3 would raise errors).
+
+    _unorderable_message = (
+        "WeakRef is not totally orderable. Storing this in "
+        "BTrees is a bad idea. Seeing this warning come from anything other than a "
+        "test module is an error."
+    )
+
     def __lt__(self, other):
-        warnings.warn("Default WeakRef (to %s) is not totally orderable" % type(self()),
-                      stacklevel=2)
+        warnings.warn(self._unorderable_message, stacklevel=2)
         return id(self) < id(other)
 
     def __gt__(self, other):
-        warnings.warn("Default WeakRef (to %s) is not totally orderable" % type(self()),
-                      stacklevel=2)
+        warnings.warn(self._unorderable_message, stacklevel=2)
         return id(self) > id(other)
 
 
@@ -166,6 +174,8 @@ class ArbitraryOrderableWeakRef(WeakRef):
     A subclass of :class:`WeakRef` that is orderable in a completely arbitrary
     way (based simply on intids).
     """
+
+    __slots__ = ()
 
     def __lt__(self, other):
         # pylint: disable=protected-access
@@ -183,6 +193,9 @@ class ArbitraryOrderableWeakRef(WeakRef):
 
 
 class NoCachingArbitraryOrderableWeakRef(ArbitraryOrderableWeakRef):
-
+    """
+    Does not allow caching.
+    """
+    __slots__ = ()
     def __call__(self, unused_allow_cached=False):
         return ArbitraryOrderableWeakRef.__call__(self, allow_cached=False)

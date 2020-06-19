@@ -8,6 +8,7 @@ entry_points = {
 }
 
 TESTS_REQUIRE = [
+    'coverage',
     'ZODB',
     'fudge',
     'nti.site',
