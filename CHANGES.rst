@@ -6,7 +6,7 @@
 0.0.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Refactor tests to use ``nti.site.testing`` for DB and site management.
 
 
 0.0.1 (2020-06-19)
