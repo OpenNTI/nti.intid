@@ -68,7 +68,7 @@ class ConnectionStub(object):
 class TestUtility(AbstractTestBase):
 
     def setUp(self):
-        super(TestUtility, self).setUp()
+        super().setUp()
         eventtesting.setUp()
 
     def test_interface(self):
@@ -92,7 +92,7 @@ class TestUtility(AbstractTestBase):
         stub.add(obj)
         assert_that(stub.db(), is_(stub))
 
-        assert_that(obj, 
+        assert_that(obj,
                     has_property('_p_jar', is_(stub)))
 
         count = 1
@@ -129,15 +129,15 @@ class TestUtility(AbstractTestBase):
         obj._ds_id = 100
         stub = ConnectionStub()
         stub.add(obj)
-        
+
         u.force_register(100, obj)
-        assert_that(calling(u.force_register).with_args(100, P()), 
+        assert_that(calling(u.force_register).with_args(100, P()),
                     raises(IntIdInUseError))
-        
-        assert_that(calling(u.force_unregister).with_args(200, obj), 
+
+        assert_that(calling(u.force_unregister).with_args(200, obj),
                     raises(KeyError))
 
-        assert_that(calling(u.force_unregister).with_args(100, P()), 
+        assert_that(calling(u.force_unregister).with_args(100, P()),
                     raises(KeyError))
 
         u.force_unregister(100, obj, True)

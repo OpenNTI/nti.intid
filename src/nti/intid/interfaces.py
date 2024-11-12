@@ -30,6 +30,7 @@ zope.deferredimport.deprecated(
     IntIdRemovedEvent='zc.intid.interfaces:BeforeIdRemovedEvent')
 
 # pylint:disable=no-method-argument,no-self-argument
+# pylint:disable=too-many-ancestors
 
 class IIntIds(IZCIIntIds, IIntIdsSubclass, IContained):
     """

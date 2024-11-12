@@ -1,6 +1,6 @@
 import codecs
 from setuptools import setup
-from setuptools import find_packages
+from setuptools import find_namespace_packages
 
 entry_points = {
     'console_scripts': [
@@ -10,7 +10,6 @@ entry_points = {
 TESTS_REQUIRE = [
     'coverage',
     'ZODB',
-    'fudge',
     'nti.site',
     'nti.testing',
     'persistent',
@@ -46,29 +45,26 @@ setup(
         'Operating System :: OS Independent',
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     url="https://github.com/OpenNTI/nti.intid",
     zip_safe=True,
-    packages=find_packages('src'),
+    packages=find_namespace_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
-    namespace_packages=['nti'],
-    tests_require=TESTS_REQUIRE,
     install_requires=[
         'Acquisition',
         'BTrees',
         'nti.externalization',
         'nti.ntiids',
         'nti.wref',
-        'setuptools',
         'zc.intid',
         'zope.component',
         'zope.deferredimport',
@@ -89,4 +85,5 @@ setup(
         ],
     },
     entry_points=entry_points,
+    python_requires=">=3.10",
 )
