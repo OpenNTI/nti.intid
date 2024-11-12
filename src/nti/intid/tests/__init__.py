@@ -23,8 +23,10 @@ class mock_db_trans(site_testing.persistent_site_trans):
 
 
     def on_connection_opened(self, conn):
-        super(mock_db_trans, self).on_connection_opened(conn)
         from nti.intid.utility import IntIds
+
+        super().on_connection_opened(conn)
+
         folder = conn.root()[str(self.main_application_folder_name)]
         lsm = folder.getSiteManager()
         intids = IntIds('_ds_intid', family=BTrees.family64)

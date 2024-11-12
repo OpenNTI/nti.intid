@@ -1,12 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. $Id$
+Root of nti.intid.
 """
 
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
+
+__all__ = [
+    'INTIIntIdAddedEvent',
+    'INTIIntIdRemovedEvent',
+    'NTIIntIdAddedEvent',
+    'NTIIntIdRemovedEvent',
+
+]
 
 from zc.intid.interfaces import IAfterIdAddedEvent as INTIIntIdAddedEvent
 from zc.intid.interfaces import IBeforeIdRemovedEvent as INTIIntIdRemovedEvent
