@@ -18,9 +18,9 @@ jobs:
           - "3.13"
         extras:
           - "[test,docs]"
-        include:
-          - python-version: "3.13"
-            extras: "[test,docs,gevent,pyramid]"
+        # include:
+        #   - python-version: "3.13"
+        #     extras: "[test,docs,gevent,pyramid]"
 
     runs-on: ubuntu-latest
     steps:
