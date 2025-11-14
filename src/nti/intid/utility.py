@@ -5,12 +5,11 @@ Contains a :mod:`zc.intid.utility` derived utility for managing
 intids. The primary reason to do this is to provide better exceptions,
 and future proofing of behaviour.
 """
-
-from __future__ import division
-from __future__ import print_function
-from __future__ import absolute_import
-
-from Acquisition import aq_base
+try:
+    from Acquisition import aq_base
+except ModuleNotFoundError: # pragma: no cover
+    def aq_base(obj):
+        return obj
 
 import BTrees
 

@@ -3,10 +3,11 @@
 =========
 
 
-1.0.1 (unreleased)
+1.1.0 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Add support for Python 3.14; drop support for Python < 3.12.
+- Acquisition is an optional dependency, not installed by default.
 
 
 1.0.0 (2024-11-12)
