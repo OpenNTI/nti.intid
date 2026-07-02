@@ -3,10 +3,10 @@
 =========
 
 
-1.1.1 (unreleased)
+1.2.0 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Add support for Python 3.15.
 
 
 1.1.0 (2025-11-14)
